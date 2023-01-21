@@ -1,0 +1,8 @@
+//
+// Created by meita on 17/01/2023.
+//
+
+#ifndef EX6_MEITAR453_DICTIONARY_HPP
+#define EX6_MEITAR453_DICTIONARY_HPP
+
+#endif //EX6_MEITAR453_DICTIONARY_HPP
