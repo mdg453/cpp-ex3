@@ -12,17 +12,26 @@ using std::pair ;
 
 
 template <typename KeyT, typename ValueT> class HashMap{
-    typedef vector<pair<KeyT,ValueT>> buc_vec ;
+    typedef vector<pair<KeyT&,ValueT&>> buc_vec ;
     typedef buc_vec buc_vec_array[] ;
 public:
-
-    explicit HashMap(const buc_vec_array& data, const int size, const int capasity) :
+    HashMap(int size, int capasity, buc_vec_array& data) :
+            size_(size), capasity_(capasity), main_vec_(data) {}
+    HashMap(const int size, const int capasity, const buc_vec_array& data) :
                     size_(size), capasity_(capasity), main_vec_(data) {}
-    explicit HashMap(const KeyT& keys,const ValueT values , const int size, const int capasity) :
-                    size_(size), capasity_(capasity), main_vec_(buc_vec_array (buc_vec (keys,values))) {}
+//  HashMap(const int size, const int capasity, const KeyT& keys, const ValueT values) :
+//                    size_(size), capasity_(capasity), main_vec_(buc_vec_array (buc_vec (array<pair<keys,values>)>) {}
 
-    explicit HashMap() : main_vec_(new buc_vec_array(16) ,size_ = 0  , capasity_ = 16  ) {}
-    virtual ~HashMap() {}
+    HashMap() : main_vec_(new buc_vec_array(16) ,size_ = 0  , capasity_ = 16  ) {}
+
+    ~HashMap() {
+        for (int i = 0; i < capasity_; ++i) {
+            for (int j = 0; j < main_vec_[i].size() ; ++j) {
+                delete main_vec_[i][j].first ;
+                delete main_vec_[i][j].second ;
+            }
+        }
+    }
 
     HashMap& operator= (const HashMap& data) {
         if (this == &data){
@@ -92,7 +101,7 @@ public:
         return true ;
     }
 
-    bool erase (KeyT key, ValueT value){
+    virtual bool erase (KeyT key){
         if(!contains_key(key)){
             return false;
         }
@@ -207,7 +216,7 @@ public:
     };
 
 
-private:
+protected:
     int size_ ;
     int capasity_ ;
     buc_vec_array main_vec_ ;
