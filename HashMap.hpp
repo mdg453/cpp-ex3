@@ -1,31 +1,57 @@
-//
-// Created by meita on 17/01/2023.
-//
 #include <stdio.h>
 #include <vector>
 #include <iostream>
 #ifndef EX6_MEITAR453_HASHMAP_HPP
 #define EX6_MEITAR453_HASHMAP_HPP
+#define BASE_CAP 16
+#define BAD_SIZE "vectors length not equal"
 using std::vector ;
 using std::pair ;
+using std::string ;
 
-
-
-template <typename KeyT, typename ValueT> class HashMap{
+template<typename KeyT, typename ValueT> class HashMap{
     typedef vector<pair<KeyT&,ValueT&>> buc_vec ;
     typedef buc_vec buc_vec_array[] ;
-public:
-    HashMap(int size, int capasity, buc_vec_array& data) :
-            size_(size), capasity_(capasity), main_vec_(data) {}
-    HashMap(const int size, const int capasity, const buc_vec_array& data) :
-                    size_(size), capasity_(capasity), main_vec_(data) {}
-//  HashMap(const int size, const int capasity, const KeyT& keys, const ValueT values) :
-//                    size_(size), capasity_(capasity), main_vec_(buc_vec_array (buc_vec (array<pair<keys,values>)>) {}
+protected:
+    buc_vec_array *main_vec_ ;
+    int size_ = 0  ;
+    int capacity_ = BASE_CAP ;
 
-    HashMap() : main_vec_(new buc_vec_array(16) ,size_ = 0  , capasity_ = 16  ) {}
+
+
+public:
+
+    HashMap(): size_(0), capacity_(BASE_CAP), main_vec_(new vector<pair<KeyT, ValueT>>[BASE_CAP]) {}
+
+    HashMap (const std::vector<KeyT> &keys, const std::vector<ValueT> &values) : HashMap () {
+        if (keys.size () != values.size ())
+        {
+            throw (std::domain_error{BAD_SIZE});
+        }
+        for (size_t i = 0; i < keys.size (); i++) {
+            if (contains_key(keys[i])) {
+                at(keys[i]) = values[i];
+            }
+            else {
+                insert(keys[i], values[i]);
+            }
+        }
+    }
+    HashMap (const HashMap &map_to_copy)
+    {
+        capacity_ = map_to_copy.capacity_;
+        size_ = map_to_copy.size_;
+        map_to_copy = new vector<pair<KeyT, ValueT>>[capacity_];
+        for (int i = 0; i < capacity_; i++)
+        {
+            main_vec_[i] = map_to_copy.main_vec_[i];
+        }
+
+
+    }
 
     ~HashMap() {
-        for (int i = 0; i < capasity_; ++i) {
+        for (int i = 0; i < capacity_; ++i) {
             for (int j = 0; j < main_vec_[i].size() ; ++j) {
                 delete main_vec_[i][j].first ;
                 delete main_vec_[i][j].second ;
@@ -46,7 +72,7 @@ public:
     }
 
     int size(){ return size_ ;}
-    int capacity(){return capasity_ ; }
+    int capacity(){return capacity_ ; }
     bool empty(){return size_ != 0 ;}
 
     bool contains_key(KeyT key_to_check) {
@@ -61,14 +87,14 @@ public:
     }
 
     double get_load_factor(){
-        double load_factor = (((double)size_)/capasity_) ;
+        double load_factor = (((double)size_)/capacity_) ;
         return load_factor ;
     }
 
     void rehash(){
         buc_vec  new_vec = {} ;
         int j = 0 ;
-        for (int i = 0; i < capasity_; ++i) {
+        for (int i = 0; i < capacity_; ++i) {
             while(main_vec_[i][j]) {
                 new_vec.insert(main_vec_[i][j]) ;
                 j++ ;
@@ -101,7 +127,7 @@ public:
         return true ;
     }
 
-    virtual bool erase (KeyT key){
+    bool erase (KeyT& key){
         if(!contains_key(key)){
             return false;
         }
@@ -177,7 +203,7 @@ public:
     }
     void clear(){
         int j = 0 ;
-        for (int i = 0; i < capasity_; ++i) {
+        for (int i = 0; i < capacity_; ++i) {
             j = 0 ;
             while (main_vec_[i][j]){
                 main_vec_[i].erase(j) ;
@@ -186,41 +212,31 @@ public:
         }
     }
     class const_iterator {
-    public:
-        const_iterator(const buc_vec_array& data, int size) : main_vec_(data), size_(size), current_bucket_(0), current_pos_(0) {}
-
-        const pair<KeyT,ValueT>& operator*() const {
-            return main_vec_[current_bucket_][current_pos_];
-        }
-
-        const_iterator& operator++() {
-            current_pos_++;
-            if (current_pos_ == main_vec_[current_bucket_].size()) {
-                current_pos_ = 0;
-                current_bucket_++;
-                while (current_bucket_ < size_ && main_vec_[current_bucket_].empty())
-                    current_bucket_++;
-            }
-            return *this;
-        }
-
-        bool operator!=(const const_iterator& other) const {
-            return current_bucket_ != other.current_bucket_ || current_pos_ != other.current_pos_;
-        }
-
     private:
-        const buc_vec_array& main_vec_;
+        const HashMap<KeyT,ValueT>& map_;
         int size_;
         int current_bucket_;
         int current_pos_;
+    public:
+        friend class HashMap<KeyT,ValueT> ;
+        typedef std::pair<KeyT, ValueT> value_type;
+        typedef const value_type &reference;
+        typedef const value_type *pointer;
+        typedef int difference_type;
+        typedef std::forward_iterator_tag iterator_category;
+        const_iterator(const HashMap<KeyT,ValueT> &data, int size) : map_(data), size_(size), current_bucket_(0), current_pos_(0) {}
+        size_t size() const {return size_ ;}
+        const_iterator begin(){
+            return map_.main_vec_ ;
+        }
+        const_iterator end(){
+
+            return const_iterator(*this, this->size_, 0 , 0) ;
+        }
+
+
+
     };
-
-
-protected:
-    int size_ ;
-    int capasity_ ;
-    buc_vec_array main_vec_ ;
-
 };
 
 
