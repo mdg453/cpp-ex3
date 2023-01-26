@@ -2,10 +2,7 @@
 #ifndef EX6_MEITAR453_DICTIONARY_HPP
 #define EX6_MEITAR453_DICTIONARY_HPP
 #include "HashMap.hpp"
-#include <iostream>
-#include <string>
-#include <stdexcept>
-#include <iterator>
+
 
 using std::string ;
 using std::pair;
@@ -22,17 +19,20 @@ public:
 class Dictionary : public HashMap<std::string, std::string> {
 public:
     using HashMap<string,string>::HashMap ;
-    virtual bool erase(const string& key) override {
-        if(!contains_key(key)){ throw InvalidKey() ;}
-        return HashMap::erase(key);
+    virtual bool erase(const string& key) final {
+        if(this.contains_key(key)){ throw InvalidKey() ;}
+        return this.erase(key);
     }
     bool update(const iterator& it_begin, const iterator& it_end) {
-
-
+        while (it_begin->first != it_end->first){
+            this->insert(it_begin->first, it_begin->second) ;
+            it_begin += it_begin.operator+() ;
+        }
+        if (it_begin->second != it_end->second ){
+            return false ;
+        }
+        return true ;
     }
-
-
-
 
 };
 

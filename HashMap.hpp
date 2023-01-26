@@ -1,4 +1,4 @@
-#include <stdio.h>
+#include <cstdio>
 #include <vector>
 #include <iostream>
 #ifndef EX6_MEITAR453_HASHMAP_HPP
@@ -68,7 +68,7 @@ public:
     }
 
     int hush_func(const KeyT &key) const {
-        return (int)(std::hash<KeyT>{} (key) && (sizeof(main_vec_))) ;
+        return (int)(std::hash<KeyT>{} (key) && (capacity_ - 1)) ;
     }
 
     int size(){ return size_ ;}
@@ -212,30 +212,68 @@ public:
         }
     }
     class const_iterator {
+        friend class HashMap ;
     private:
         const HashMap<KeyT,ValueT>& map_;
-        int size_;
         int current_bucket_;
         int current_pos_;
     public:
-        friend class HashMap<KeyT,ValueT> ;
+
         typedef std::pair<KeyT, ValueT> value_type;
         typedef const value_type &reference;
         typedef const value_type *pointer;
         typedef int difference_type;
         typedef std::forward_iterator_tag iterator_category;
-        const_iterator(const HashMap<KeyT,ValueT> &data, int size) : map_(data), size_(size), current_bucket_(0), current_pos_(0) {}
-        size_t size() const {return size_ ;}
-        const_iterator begin(){
+    private:
+        const_iterator(const HashMap<KeyT,ValueT> &data, int size) : map_(data), current_bucket_(0), current_pos_(0) {}
+
+    public:
+        const_iterator cbegin() const{
             return map_.main_vec_ ;
         }
+        const_iterator cend() const{
+            return const_iterator(*this, this->map_.capacity_ , 0 ) ;
+        }
+        const_iterator begin(){
+            return cbegin() ;
+        }
         const_iterator end(){
-
-            return const_iterator(*this, this->size_, 0 , 0) ;
+            return cend() ;
         }
 
+        const_iterator& operator++ () {
+            if(current_pos_+ 1 < sizeof(map_[current_bucket_])){
+                current_pos_++ ;
+            } else if (current_bucket_+1 < sizeof(map_)){
+                current_pos_ = 0 ;
+                current_bucket_++ ;
+            }
+        }
 
+        const_iterator operator++ (int j){
+            for (int i = 0; i < j; ++i) {
+                this->operator++() ;
+            }
+            return this ;
+        }
 
+        bool operator== (const const_iterator &pair_to_check) const {
+            bool flag = (&map_ == &pair_to_check.map_ && current_bucket_ ==
+                    pair_to_check.current_bucket_ && current_pos_ == pair_to_check.current_pos_) ;
+            return flag ;
+        }
+
+        bool operator!= (const const_iterator &pair_to_check) const{
+            return !this->operator==(pair_to_check) ;
+        }
+
+        reference operator* () const{
+            return map_.main_vec_[this->current_bucket_][this->current_pos_] ;
+        }
+
+        pointer operator-> () const{
+            return &this->operator*() ;
+        }
     };
 };
 
