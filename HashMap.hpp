@@ -36,7 +36,7 @@ public:
     HashMap (const vector<KeyT> &keys, const vector<ValueT> &values) : HashMap(){
         if (keys.size () != values.size ())
         {
-            throw (std::domain_error{BAD_SIZE});
+            throw (std::domain_error{"vectors length not equal"});
         }
         size_ = 0 ;
         capacity_ = BASE_CAP ;
@@ -55,22 +55,15 @@ public:
     {
         capacity_ = map_to_copy.capacity_;
         size_ = map_to_copy.size_;
-        map_to_copy = new vector<pair<KeyT, ValueT>>[capacity_];
+        main_array_p_ = new vector<pair<KeyT, ValueT>>[capacity_];
         for (int i = 0; i < capacity_; i++)
         {
             main_array_p_[i] = map_to_copy.main_array_p_[i];
         }
-
-
     }
 
     virtual ~HashMap() {
-        for (int i = 0; i < capacity_; ++i) {
-            for (int j = 0; j < main_array_p_[i].size() ; ++j) {
-                delete main_array_p_[i][j].first ;
-                delete main_array_p_[i][j].second ;
-            }
-        }
+        delete[] main_array_p_ ;
     }
 
     HashMap& operator= (const HashMap& data) {
@@ -164,26 +157,7 @@ public:
         HashMap new_hash = new HashMap(array_of_pairs, sizeof(new_vec), sizeof(new_vec)^SQURE) ;
         swap(this, new_hash) ;
     }
-    void resize_less ()
-    {
-        int pre_capacity = capacity_;
-        while (get_load_factor () > HIGHLIM)
-        {
-            capacity_ *= 2;
-        }
-        auto return_map = new pair_vec_array[int (capacity_)];
-        for (int i = 0; i < pre_capacity; i++)
-        {
-            for (size_t j = 0; j < main_array_p_[i].size (); j++)
-            {
-                int index = hash_function (main_array_p_[i][j].first);
-                return_map[index]. emplace_back (std::pair<KeyT, ValueT> (
-                        main_array_p_[i][j].first, main_array_p_[i][j].second));
-            }
-        }
-        delete[] main_array_p_;
-        main_array_p_ = return_map;
-    }
+
 
     bool insert(KeyT key, ValueT value){
         if(contains_key(key)){

@@ -21,7 +21,7 @@ public:
 //    Dictionary() = default ;
 //    Dictionary(const vector<string>& keys, const vector<string>& values):
 //            HashMap<string,string>(keys, values){};
-    bool erase(const string& key) final {
+    bool erase(const string &key) final {
         if(HashMap<string ,string>::contains_key(key)){
             return HashMap<std::basic_string,std::basic_string>::erase(key) ;
         }
