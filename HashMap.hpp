@@ -70,7 +70,7 @@ public:
         if (this == &data){
             return *this ;
         }
-        std::swap(this->in_data, data) ;
+        std::swap(this->main_array_p_, data) ;
         return (*this) ;
     }
 
@@ -227,13 +227,13 @@ public:
     }
 
 
-    class const_iterator {
+    class ConstIterator {
         friend class HashMap ;
     private:
         const HashMap<KeyT,ValueT>& map_;
         int current_bucket_;
         int current_pos_;
-        explicit const_iterator(const HashMap<KeyT,ValueT> &data) : map_(data), current_bucket_(0), current_pos_(0) {}
+        explicit ConstIterator(const HashMap<KeyT,ValueT> &data) : map_(data), current_bucket_(0), current_pos_(0) {}
     public:
         typedef std::pair<KeyT, ValueT> value_type;
         typedef const value_type &reference;
@@ -241,7 +241,7 @@ public:
         typedef std::ptrdiff_t difference_type;
         typedef std::forward_iterator_tag iterator_category;
 
-        const_iterator& operator++ () {
+        ConstIterator& operator++ () {
             if(current_pos_+ 1 < sizeof(map_[current_bucket_])){
                 current_pos_++ ;
             } else if (current_bucket_+1 < sizeof(map_)){
@@ -251,19 +251,19 @@ public:
             return *this ;
         }
 
-        const_iterator operator++ (int){
-            const_iterator copy(*this) ;
+        ConstIterator operator++ (int){
+            ConstIterator copy(*this) ;
             this->operator++() ;
             return *this ;
         }
 
-        bool operator== (const const_iterator &pair_to_check) const {
+        bool operator== (const ConstIterator &pair_to_check) const {
             bool flag = (&map_ == &pair_to_check.map_ && current_bucket_ ==
                     pair_to_check.current_bucket_ && current_pos_ == pair_to_check.current_pos_) ;
             return flag ;
         }
 
-        bool operator!= (const const_iterator &pair_to_check) const{
+        bool operator!= (const ConstIterator &pair_to_check) const{
             return !this->operator==(pair_to_check) ;
         }
 
@@ -275,15 +275,16 @@ public:
             return &this->operator*() ;
         }
     };
+    using const_iterator = ConstIterator;
 
 
-    const_iterator cbegin() const{
+    ConstIterator cbegin() const{
         int i = 0 ;
         while (!main_array_p_[i][0]){i++ ;}
         return main_array_p_[i][0] ;
     }
 
-    const_iterator cend() const{
+    ConstIterator cend() const{
         int indx = bucket_index(size_) ;
         int i = 0 ;
         while (main_array_p_[indx][i]){
@@ -292,9 +293,9 @@ public:
         return main_array_p_[indx][i] ;
     }
 
-    const_iterator begin() const { return cbegin();};
+    ConstIterator begin() const { return cbegin();};
 
-    const_iterator end() const { return cend();};
+    ConstIterator end() const { return cend();};
 
     void swap (HashMap other) {
         std::swap (this->main_array_p_, other.main_array_p_);
