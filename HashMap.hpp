@@ -132,7 +132,17 @@ public:
 
     bool contains_key(KeyT &key_to_check) {
         int indx = hush_func(key_to_check) ;
-        for (int i = 0; i < sizeof(main_array_p_[indx]); ++i) {
+        for (int i = 0; i < main_array_p_[indx]->size(); ++i) {
+            if (main_array_p_[indx][i].first == key_to_check)
+            {
+                return true ;
+            }
+        }
+        return false ;
+    }
+    bool contains_key(const KeyT key_to_check) const {
+        int indx = hush_func(key_to_check) ;
+        for (int i = 0; i < main_array_p_[indx]->size(); ++i) {
             if (main_array_p_[indx][i].first == key_to_check)
             {
                 return true ;
