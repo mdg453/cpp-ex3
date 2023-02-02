@@ -96,7 +96,7 @@ public:
     }
 
     int bucket_size(KeyT key){
-        return sizeof(main_array_p_[hush_func(key)]) ;
+        return main_array_p_[hush_func(key)].size() ;
     }
 
     ValueT &operator[] (const KeyT &key) {
@@ -114,6 +114,9 @@ public:
     }
 
     ValueT operator[] (const KeyT &key) const{
+        if(key >= capacity_ || key < 0){
+            throw std::out_of_range(KEY_PROB) ;
+        }
         return this[key] ;
     }
 
