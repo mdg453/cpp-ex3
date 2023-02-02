@@ -210,7 +210,7 @@ public:
         return true ;
     }
 
-    ValueT &at (const KeyT key) const{
+    ValueT& at (const KeyT key) const{
         ValueT val = operator[](key) ;
         if ( val == NULL){
             throw std::runtime_error(KEY_PROB);

@@ -5,7 +5,7 @@
 using std::string;
 using std::pair;
 using std::vector ;
-using iterator = HashMap<string,string>::const_iterator ;
+using iterator = std::vector<pair<string,string>>::const_iterator;
 
 class InvalidKey: public std::invalid_argument {
 public:
@@ -22,8 +22,8 @@ public:
 //    Dictionary(const vector<string>& keys, const vector<string>& values):
 //            HashMap<string,string>(keys, values){};
     bool erase(const string &key) final {
-        if(HashMap<string ,string>::contains_key(key)){
-            return HashMap<std::basic_string,std::basic_string>::erase(key) ;
+        if(HashMap<std::basic_string<char>,std::basic_string<char>>::contains_key(key)){
+            return HashMap<std::basic_string<char>,std::basic_string<char>>::erase(key) ;
         }
         throw InvalidKey() ;
     }
@@ -31,13 +31,13 @@ public:
     void update(const iterator & it_begin, const iterator & it_end) {
         while (it_begin!=it_end)
         {
-            if(contains_key((it_begin->first))
+            if(contains_key((it_begin->first)))
             {
-                HashMap<std::string, std::string>::at ((*it_begin).first) =
-                        (*begin_iterator).second;
+                HashMap<std::basic_string<char>,std::basic_string<char>>::at ((*it_begin()).first)* =
+                        (*it_begin).second;
             }
-            HashMap<std::string, std::string>::insert((*begin_iterator).first,
-                                                      (*begin_iterator).second);
+            HashMap<std::string, std::string>::insert((**it_begin()).first).first,
+                                                      (*it_begin()).first).second);
             it_begin++;
         }
     }
