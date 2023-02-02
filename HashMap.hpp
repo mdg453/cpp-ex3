@@ -1,33 +1,45 @@
 #include <cstdio>
 #include <vector>
+#include <string>
+#include <stdexcept>
+#include <iterator>
 #include <iostream>
+#include "exception"
 #ifndef EX6_MEITAR453_HASHMAP_HPP
 #define EX6_MEITAR453_HASHMAP_HPP
 #define BASE_CAP 16
 #define BAD_SIZE "vectors length not equal"
+#define SQURE 2
+#define HIGHLIM 0.75
+#define LOWLIM 0.25
+#define KEY_PROB "key not in table"
 using std::vector ;
 using std::pair ;
 using std::string ;
 
+
 template<typename KeyT, typename ValueT> class HashMap{
-    typedef vector<pair<KeyT&,ValueT&>> buc_vec ;
-    typedef buc_vec buc_vec_array[] ;
+    typedef pair<KeyT,ValueT> single_pair ;
+    typedef vector<single_pair> pair_vec ;
+    typedef pair_vec pair_vec_array[] ;
+
 protected:
-    buc_vec_array *main_vec_ ;
-    int size_ = 0  ;
-    int capacity_ = BASE_CAP ;
-
-
+    pair_vec_array *main_array_p_ ;
+    int size_ ;
+    int capacity_ ;
 
 public:
 
-    HashMap(): size_(0), capacity_(BASE_CAP), main_vec_(new vector<pair<KeyT, ValueT>>[BASE_CAP]) {}
+    HashMap(): size_(0), capacity_(BASE_CAP), main_array_p_(new std::vector<std::pair<KeyT,
+            ValueT>>[BASE_CAP]) {}
 
-    HashMap (const std::vector<KeyT> &keys, const std::vector<ValueT> &values) : HashMap () {
+    HashMap (const vector<KeyT> &keys, const vector<ValueT> &values) : HashMap(){
         if (keys.size () != values.size ())
         {
             throw (std::domain_error{BAD_SIZE});
         }
+        size_ = 0 ;
+        capacity_ = BASE_CAP ;
         for (size_t i = 0; i < keys.size (); i++) {
             if (contains_key(keys[i])) {
                 at(keys[i]) = values[i];
@@ -37,6 +49,8 @@ public:
             }
         }
     }
+
+
     HashMap (const HashMap &map_to_copy)
     {
         capacity_ = map_to_copy.capacity_;
@@ -44,17 +58,17 @@ public:
         map_to_copy = new vector<pair<KeyT, ValueT>>[capacity_];
         for (int i = 0; i < capacity_; i++)
         {
-            main_vec_[i] = map_to_copy.main_vec_[i];
+            main_array_p_[i] = map_to_copy.main_array_p_[i];
         }
 
 
     }
 
-    ~HashMap() {
+    virtual ~HashMap() {
         for (int i = 0; i < capacity_; ++i) {
-            for (int j = 0; j < main_vec_[i].size() ; ++j) {
-                delete main_vec_[i][j].first ;
-                delete main_vec_[i][j].second ;
+            for (int j = 0; j < main_array_p_[i].size() ; ++j) {
+                delete main_array_p_[i][j].first ;
+                delete main_array_p_[i][j].second ;
             }
         }
     }
@@ -67,18 +81,63 @@ public:
         return (*this) ;
     }
 
+    bool operator== (const HashMap map) const{
+        if (this->size_ != map.size_ || this->capacity_ != map.capacity_) {
+            return false ;
+        }
+        for(int i = 0 ; i < capacity_; i++) {
+            if (sizeof(main_array_p_[i]) != sizeof(map.in_data[i])) {
+                return false ;
+            }
+            for (int j = 0 ; j < sizeof(main_array_p_[i]) ; j++ ) {
+                if (main_array_p_[i][j].first != map.in_data[i][j].first || main_array_p_[i][j].second != map.in_data[i][j].second){
+                    return false ;
+                }
+            }
+        }
+        return true ;
+    }
+
+    bool operator!= (const HashMap map) const{
+        return !(this->operator==(map)) ;
+    }
+
+    int bucket_size(KeyT key){
+        return sizeof(main_array_p_[hush_func(key)]) ;
+    }
+
+    ValueT &operator[] (const KeyT &key) {
+        // hash func -> v mod size = v & (size − 1)
+
+        int indx = hush_func(key);
+        int i = 0;
+        while (main_array_p_[indx][i].first != key || i != size_ + 1) {
+            i++;
+        }
+        if (i != size_) {
+            return main_array_p_[indx][i].second;
+        }
+        return NULL ;
+    }
+
+    ValueT operator[] (const KeyT &key) const{
+        return this[key] ;
+    }
+
     int hush_func(const KeyT &key) const {
         return (int)(std::hash<KeyT>{} (key) && (capacity_ - 1)) ;
     }
 
     int size(){ return size_ ;}
+
     int capacity(){return capacity_ ; }
+
     bool empty(){return size_ != 0 ;}
 
-    bool contains_key(KeyT key_to_check) {
+    bool contains_key(KeyT &key_to_check) {
         int indx = hush_func(key_to_check) ;
-        for (int i = 0; i < sizeof(main_vec_[indx]); ++i) {
-            if (main_vec_[indx][i].first == key_to_check)
+        for (int i = 0; i < sizeof(main_array_p_[indx]); ++i) {
+            if (main_array_p_[indx][i].first == key_to_check)
             {
                 return true ;
             }
@@ -92,18 +151,38 @@ public:
     }
 
     void rehash(){
-        buc_vec  new_vec = {} ;
+        pair_vec  new_vec = {} ;
         int j = 0 ;
         for (int i = 0; i < capacity_; ++i) {
-            while(main_vec_[i][j]) {
-                new_vec.insert(main_vec_[i][j]) ;
+            while(main_array_p_[i][j]) {
+                new_vec.insert(main_array_p_[i][j]) ;
                 j++ ;
             }
             j = 0 ;
         }
-        buc_vec_array array_of_pairs = new_vec ;
-        HashMap new_hash = new HashMap(array_of_pairs, sizeof(new_vec), sizeof(new_vec)^2) ;
+        pair_vec_array array_of_pairs = new_vec ;
+        HashMap new_hash = new HashMap(array_of_pairs, sizeof(new_vec), sizeof(new_vec)^SQURE) ;
         swap(this, new_hash) ;
+    }
+    void resize_less ()
+    {
+        int pre_capacity = capacity_;
+        while (get_load_factor () > HIGHLIM)
+        {
+            capacity_ *= 2;
+        }
+        auto return_map = new pair_vec_array[int (capacity_)];
+        for (int i = 0; i < pre_capacity; i++)
+        {
+            for (size_t j = 0; j < main_array_p_[i].size (); j++)
+            {
+                int index = hash_function (main_array_p_[i][j].first);
+                return_map[index]. emplace_back (std::pair<KeyT, ValueT> (
+                        main_array_p_[i][j].first, main_array_p_[i][j].second));
+            }
+        }
+        delete[] main_array_p_;
+        main_array_p_ = return_map;
     }
 
     bool insert(KeyT key, ValueT value){
@@ -112,134 +191,78 @@ public:
         }
         int indx = hush_func(key) ;
         int i = 0 ;
-        while(main_vec_[indx][i]){
+        while(main_array_p_[indx][i]){
             i++ ;
         }
-        main_vec_[indx].emplace_back(buc_vec()) ;
-        main_vec_[indx][i].first = key ;
-        main_vec_[indx][i].second = value ;
+        main_array_p_[indx].emplace_back(pair_vec()) ;
+        main_array_p_[indx][i].first = key ;
+        main_array_p_[indx][i].second = value ;
         size_++ ;
         double load_factor = get_load_factor() ;
-        double high_load_factor = 0.75 ;
+        double high_load_factor = HIGHLIM ;
         if (load_factor > high_load_factor) {
             rehash() ;
         }
         return true ;
     }
 
-    bool erase (KeyT& key){
+    virtual bool erase (const KeyT &key){
         if(!contains_key(key)){
             return false;
         }
         int indx = hush_func(key) ;
         int i = 0 ;
-        while(main_vec_[indx][i].first != key ){
+        while(main_array_p_[indx][i].first != key ){
             i++ ;
         }
-        main_vec_[indx].erase(i) ;
+        main_array_p_[indx].erase(i) ;
         size_-- ;
-        double load_factor = get_load_factor() ;
-        double lower_load_factor = 0.25 ;
-        if (load_factor < lower_load_factor) {
+        if (get_load_factor() < LOWLIM) {
             rehash() ;
         }
         return true ;
     }
 
-    ValueT operator[] (const KeyT key) const {
-        // hash func -> v mod size = v & (size − 1)
-
-        int indx = hush_func(key);
-        int i = 0;
-        while (main_vec_[indx][i].first != key || i != size_ + 1) {
-            i++;
-        }
-        if (i != size_) {
-            return main_vec_[indx][i].second;
-        }
-        return NULL ;
-    }
-
-
-    ValueT at (const KeyT key) const{
+    ValueT &at (const KeyT key) const{
         ValueT val = operator[](key) ;
         if ( val == NULL){
-            throw std::runtime_error("key not in table");
+            throw std::runtime_error(KEY_PROB);
         }
         return val ;
-    }
-
-    bool operator== (const HashMap map) const{
-        if (sizeof(main_vec_) != sizeof(map.in_data)) {
-            return false ;
-        }
-        for(int i = 0 ; i < sizeof(main_vec_); i++) {
-            if (sizeof(main_vec_[i]) != sizeof(map.in_data[i])) {
-                return false ;
-            }
-            for (int j = 0 ; j < sizeof(main_vec_[i]) ; j++ ) {
-                if (main_vec_[i][j].first != map.in_data[i][j].first || main_vec_[i][j].second != map.in_data[i][j].second){
-                    return false ;
-                }
-            }
-        }
-        return true ;
-    }
-
-    bool operator!= (const HashMap map) const{
-        return !(this == map) ;
-    }
-
-    int bucket_size(KeyT key){
-        int indx = hush_func(key) ;
-        return sizeof(main_vec_[indx]) ;
     }
 
     int bucket_index(KeyT key){
         if (contains_key(key)){
             return hush_func(key);
         }
-        throw std::runtime_error("no suck key");
+        throw std::runtime_error(KEY_PROB);
     }
+
     void clear(){
         int j = 0 ;
         for (int i = 0; i < capacity_; ++i) {
             j = 0 ;
-            while (main_vec_[i][j]){
-                main_vec_[i].erase(j) ;
+            while (main_array_p_[i][j]){
+                main_array_p_[i].erase(j) ;
                 j++ ;
             }
         }
     }
+
+
     class const_iterator {
         friend class HashMap ;
     private:
         const HashMap<KeyT,ValueT>& map_;
         int current_bucket_;
         int current_pos_;
+        explicit const_iterator(const HashMap<KeyT,ValueT> &data) : map_(data), current_bucket_(0), current_pos_(0) {}
     public:
-
         typedef std::pair<KeyT, ValueT> value_type;
         typedef const value_type &reference;
         typedef const value_type *pointer;
-        typedef int difference_type;
+        typedef std::ptrdiff_t difference_type;
         typedef std::forward_iterator_tag iterator_category;
-    private:
-        const_iterator(const HashMap<KeyT,ValueT> &data, int size) : map_(data), current_bucket_(0), current_pos_(0) {}
-
-    public:
-        const_iterator cbegin() const{
-            return map_.main_vec_ ;
-        }
-        const_iterator cend() const{
-            return const_iterator(*this, this->map_.capacity_ , 0 ) ;
-        }
-        const_iterator begin(){
-            return cbegin() ;
-        }
-        const_iterator end(){
-            return cend() ;
-        }
 
         const_iterator& operator++ () {
             if(current_pos_+ 1 < sizeof(map_[current_bucket_])){
@@ -248,13 +271,13 @@ public:
                 current_pos_ = 0 ;
                 current_bucket_++ ;
             }
+            return *this ;
         }
 
-        const_iterator operator++ (int j){
-            for (int i = 0; i < j; ++i) {
-                this->operator++() ;
-            }
-            return this ;
+        const_iterator operator++ (int){
+            const_iterator copy(*this) ;
+            this->operator++() ;
+            return *this ;
         }
 
         bool operator== (const const_iterator &pair_to_check) const {
@@ -268,13 +291,40 @@ public:
         }
 
         reference operator* () const{
-            return map_.main_vec_[this->current_bucket_][this->current_pos_] ;
+            return map_.main_array_p_[this->current_bucket_][this->current_pos_] ;
         }
 
         pointer operator-> () const{
             return &this->operator*() ;
         }
     };
+
+
+    const_iterator cbegin() const{
+        int i = 0 ;
+        while (!main_array_p_[i][0]){i++ ;}
+        return main_array_p_[i][0] ;
+    }
+
+    const_iterator cend() const{
+        int indx = bucket_index(size_) ;
+        int i = 0 ;
+        while (main_array_p_[indx][i]){
+            i++ ;
+        }
+        return main_array_p_[indx][i] ;
+    }
+
+    const_iterator begin() const { return cbegin();};
+
+    const_iterator end() const { return cend();};
+
+    void swap (HashMap other) {
+        std::swap (this->main_array_p_, other.main_array_p_);
+        std::swap (this->size_, other.size_);
+        std::swap (this->capacity_, other.capacity_);
+    }
+
 };
 
 
