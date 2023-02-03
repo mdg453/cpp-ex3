@@ -83,7 +83,8 @@ public:
                 return false ;
             }
             for (int j = 0 ; j < sizeof(main_array_p_[i]) ; j++ ) {
-                if (main_array_p_[i][j].first != map.in_data[i][j].first || main_array_p_[i][j].second != map.in_data[i][j].second){
+                if (main_array_p_[i][j].first != map.in_data[i][j].first ||
+                                    main_array_p_[i][j].second != map.in_data[i][j].second){
                     return false ;
                 }
             }
@@ -113,7 +114,7 @@ public:
         return NULL ;
     }
 
-    ValueT operator[] (const KeyT &key) const{
+    ValueT& operator[] (const KeyT &key) const{
         if(key >= capacity_ || key < 0){
             throw std::out_of_range(KEY_PROB) ;
         }
