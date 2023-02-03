@@ -205,7 +205,7 @@ template<typename KeyT, typename ValueT> class HashMap{
         ValueT& at (const KeyT key) const{
             int indx = hush_func(key);
             int i = 0;
-            while (!(main_array_p_[indx][i].first == key) || i < main_array_p_[indx].size() ) {
+            while (!(main_array_p_[indx][i].first == key) && i < main_array_p_[indx].size() ) {
                 i++;
             }
             if (i != main_array_p_[indx].size()) {
