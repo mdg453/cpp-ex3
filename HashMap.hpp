@@ -48,19 +48,13 @@ template<typename KeyT, typename ValueT> class HashMap{
         }
 
 
-        HashMap (const HashMap *map_to_copy){
-            vector<KeyT> new_vec_keys = {} ;
-            vector<ValueT> new_vec_val= {} ;
-            for (int i = 0; i < capacity_; ++i) {
-                for(int j = 0 ; j < main_array_p_[i].size(); ++j ) {
-                    new_vec_keys.emplace_back(map_to_copy->main_array_p_[i][j].first) ;
-                    new_vec_val.emplace_back(map_to_copy->main_array_p_[i][j].second) ;
+        HashMap (const HashMap *map_to_copy) : HashMap(){
+            for (int i = 0; i < map_to_copy->capacity(); ++i) {
+                for(int j = 0 ; j < map_to_copy->main_array_p_[i].size(); ++j ) {
+                    insert(map_to_copy->main_array_p_[i][j].first,
+                           map_to_copy->main_array_p_[i][j].second) ;
                 }
             }
-            HashMap new_hash = new HashMap(new_vec_keys,new_vec_val) ;
-            main_array_p_ = new_hash.main_array_p_ ;
-            capacity_ = new_hash.capacity() ;
-            size_ = new_hash.size() ;
         }
 
         virtual ~HashMap() = default ;
