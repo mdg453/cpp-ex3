@@ -17,10 +17,9 @@ public:
 
 class Dictionary : public HashMap<std::string, std::string> {
 public:
-    using HashMap<string,string>::HashMap ;
-//    Dictionary() = default ;
-//    Dictionary(const vector<string>& keys, const vector<string>& values):
-//            HashMap<string,string>(keys, values){};
+    using HashMap<std::basic_string<char>,std::basic_string<char>>::HashMap ;
+
+
     bool erase(const string &key) final {
         if(HashMap<std::basic_string<char>,std::basic_string<char>>::contains_key(key)){
             return HashMap<std::basic_string<char>,std::basic_string<char>>::erase(key) ;
