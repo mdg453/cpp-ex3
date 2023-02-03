@@ -29,7 +29,7 @@ template<typename KeyT, typename ValueT> class HashMap{
 
     public:
 
-        HashMap(): size_(0), capacity_(BASE_CAP), main_array_p_(new pair_vec_array[BASE_CAP]) {}
+        HashMap() : size_(0), capacity_(BASE_CAP), main_array_p_(new pair_vec_array[BASE_CAP]) {}
 
         HashMap (const vector<KeyT> &keys, const vector<ValueT> &values) : HashMap(){
             if (keys.size () != values.size ())
@@ -81,14 +81,8 @@ template<typename KeyT, typename ValueT> class HashMap{
                 return false ;
             }
             for(int i = 0 ; i < capacity_; i++) {
-                if (main_array_p_[i].size() != map.main_array_p_[i].size()) {
+                if (main_array_p_[i] != map.main_array_p_[i]) {
                     return false ;
-                }
-                for (int j = 0 ; j < sizeof(main_array_p_[i]) ; j++ ) {
-                    if (main_array_p_[i][j].first != map.main_array_p_[i][j].first ||
-                                        main_array_p_[i][j].second != map.main_array_p_[i][j].second){
-                        return false ;
-                    }
                 }
             }
             return true ;
@@ -145,8 +139,7 @@ template<typename KeyT, typename ValueT> class HashMap{
         bool contains_key(const KeyT key_to_check) const {
             int indx = hush_func(key_to_check) ;
             for (int i = 0; i < main_array_p_[indx].size(); ++i) {
-                if (main_array_p_[indx][i].first == key_to_check)
-                {
+                if (main_array_p_[indx][i].first == key_to_check){
                     return true ;
                 }
             }
@@ -179,10 +172,9 @@ template<typename KeyT, typename ValueT> class HashMap{
                 return false;
             }
             int indx = hush_func(key) ;
-            size_t i = main_array_p_[indx].size() ;
-            main_array_p_[indx].emplace_back(single_pair()) ;
-            main_array_p_[indx][i].first = key ;
-            main_array_p_[indx][i].second = value ;
+            main_array_p_[indx].emplace_back(single_pair(key,value)) ;
+//            main_array_p_[indx][main_array_p_[indx].size()].first = key ;
+//            main_array_p_[indx][main_array_p_[indx].size()].second = value ;
             size_++ ;
             double load_factor = get_load_factor() ;
             double high_load_factor = HIGHLIM ;
@@ -212,10 +204,10 @@ template<typename KeyT, typename ValueT> class HashMap{
         ValueT& at (const KeyT key) const{
             int indx = hush_func(key);
             int i = 0;
-            while (!(main_array_p_[indx][i].first == key) || i != size_ ) {
+            while (!(main_array_p_[indx][i].first == key) || i < main_array_p_[indx].size() ) {
                 i++;
             }
-            if (i != size_) {
+            if (i != main_array_p_[indx].size()) {
                 return main_array_p_[indx][i].second;
             }
             else {

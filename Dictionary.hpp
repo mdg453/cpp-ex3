@@ -12,9 +12,8 @@ public:
     InvalidKey() : std::invalid_argument(KEY_ERR) {};
     explicit InvalidKey (const string &err_mssg) : std::invalid_argument(err_mssg){};
 };
-
-
-class Dictionary :public HashMap<string , string> {
+class Dictionary :
+                        public HashMap<string , string> {
 public:
     using HashMap<std::basic_string<char>,std::basic_string<char>>::HashMap ;
 
