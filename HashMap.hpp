@@ -13,6 +13,7 @@
 #define HIGHLIM 0.75
 #define LOWLIM 0.25
 #define KEY_PROB "key not in table"
+#define SWEET16 16
 using std::vector ;
 using std::pair ;
 using std::string ;
@@ -162,10 +163,10 @@ template<typename KeyT, typename ValueT> class HashMap{
                 main_array_p_[i].clear() ;
             }
             size_ = 0 ;
-            if(new_vec_keys.size() > HIGHLIM*capacity_){
+            while(new_vec_keys.size() > HIGHLIM*capacity_){
                 capacity_ *= 2 ;
             }
-            if(new_vec_keys.size() < LOWLIM*capacity_){
+            while (new_vec_keys.size() < LOWLIM*capacity_ && capacity_ >= SWEET16){
                 capacity_ /= 2 ;
             }
             main_array_p_ = new pair_vec_array [capacity_] ;
