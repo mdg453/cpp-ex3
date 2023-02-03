@@ -37,7 +37,7 @@ template<typename KeyT, typename ValueT> class HashMap{
             {
                 throw (std::domain_error{"vectors length not equal"});
             }
-            for (size_t i = 0; i < keys.size (); i++) {
+            for (size_t i = 0; i < keys.size(); i++) {
                 if (contains_key(keys[i])) {
                     at(keys[i]) = values[i];
                 }
@@ -102,7 +102,7 @@ template<typename KeyT, typename ValueT> class HashMap{
 
             int indx = hush_func(key);
             int i = 0;
-            while (!(main_array_p_[indx][i].first == key) || i != main_array_p_[indx].size() ) {
+            while (!(main_array_p_[indx][i].first == key) && i < main_array_p_[indx].size() ) {
                 i++;
             }
             if (i != main_array_p_[indx].size()) {
@@ -130,8 +130,7 @@ template<typename KeyT, typename ValueT> class HashMap{
         bool contains_key (KeyT &key_to_check){
             int indx = hush_func(key_to_check) ;
             for (int i = 0; i < main_array_p_[indx].size(); ++i) {
-                if (main_array_p_[indx][i].first == key_to_check)
-                {
+                if (main_array_p_[indx][i].first == key_to_check){
                     return true ;
                 }
             }
@@ -161,10 +160,20 @@ template<typename KeyT, typename ValueT> class HashMap{
                     new_vec_val.emplace_back(main_array_p_[i][j].second) ;
                 }
             }
-            HashMap new_hash = new HashMap(new_vec_keys,new_vec_val) ;
-            main_array_p_ = new_hash.main_array_p_ ;
-            capacity_ = new_hash.capacity() ;
-            size_ = new_hash.size() ;
+            for (int i = 0; i < capacity_; ++i) {
+                main_array_p_[i].clear() ;
+            }
+            size_ = 0 ;
+            if(new_vec_keys.size() > HIGHLIM*capacity_){
+                capacity_ *= 2 ;
+            }
+            if(new_vec_keys.size() > HIGHLIM*capacity_){
+                capacity_ /= 2 ;
+            }
+            main_array_p_ = new pair_vec_array [capacity_] ;
+            for (size_t i = 0; i < new_vec_keys.size(); ++i) {
+                    insert(new_vec_keys[i], new_vec_val[i]);
+            }
         }
 
 
@@ -174,12 +183,8 @@ template<typename KeyT, typename ValueT> class HashMap{
             }
             int indx = hush_func(key) ;
             main_array_p_[indx].emplace_back(single_pair(key,value)) ;
-//            main_array_p_[indx][main_array_p_[indx].size()].first = key ;
-//            main_array_p_[indx][main_array_p_[indx].size()].second = value ;
             size_++ ;
-            double load_factor = get_load_factor() ;
-            double high_load_factor = HIGHLIM ;
-            if (load_factor > high_load_factor) {
+            if (get_load_factor() > HIGHLIM) {
                 rehash() ;
             }
             return true ;
