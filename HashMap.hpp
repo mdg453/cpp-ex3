@@ -21,17 +21,16 @@ using std::string ;
 template<typename KeyT, typename ValueT> class HashMap{
     typedef pair<KeyT,ValueT> single_pair ;
     typedef vector<single_pair> pair_vec ;
-    typedef pair_vec pair_vec_array[] ;
+    typedef pair_vec pair_vec_array ;
 
 protected:
-    pair_vec_array *main_array_p_ ;
+    pair_vec_array* main_array_p_{} ;
     int size_ ;
     int capacity_ ;
 
 public:
 
-    HashMap(): size_(0), capacity_(BASE_CAP), main_array_p_(new std::vector<std::pair<KeyT,
-            ValueT>>[BASE_CAP]) {}
+    HashMap(): size_(0), capacity_(BASE_CAP), main_array_p_(new pair_vec_array[16]) {}
 
     HashMap (const vector<KeyT> &keys, const vector<ValueT> &values) : HashMap(){
         if (keys.size () != values.size ())
@@ -51,14 +50,13 @@ public:
     }
 
 
-    HashMap (const HashMap &map_to_copy)
-    {
-        capacity_ = map_to_copy.capacity_;
-        size_ = map_to_copy.size_;
+    HashMap (const HashMap *map_to_copy) {
+        capacity_ = map_to_copy->capacity_;
+        size_ = map_to_copy->size_;
         main_array_p_ = new vector<pair<KeyT, ValueT>>[capacity_];
         for (int i = 0; i < capacity_; i++)
         {
-            main_array_p_[i] = map_to_copy.main_array_p_[i];
+            main_array_p_[i] = map_to_copy->main_array_p_[i];
         }
     }
 
@@ -96,7 +94,7 @@ public:
         return !(this->operator==(map)) ;
     }
 
-    int bucket_size(KeyT key){
+    int bucket_size(KeyT key) const{
         return main_array_p_[hush_func(key)].size() ;
     }
 
@@ -105,7 +103,7 @@ public:
 
         int indx = hush_func(key);
         int i = 0;
-        while (main_array_p_[indx][i].first != key || i != size_ + 1) {
+        while (main_array_p_[indx][i].first != key || i != size_ ) {
             i++;
         }
         if (i != size_) {
@@ -115,9 +113,7 @@ public:
     }
 
     ValueT& operator[] (const KeyT &key) const{
-        if(key >= capacity_ || key < 0){
-            throw std::out_of_range(KEY_PROB) ;
-        }
+        KeyT n_key = *key ;
         return this[key] ;
     }
 
@@ -125,15 +121,15 @@ public:
         return (int)(std::hash<KeyT>{} (key) && (capacity_ - 1)) ;
     }
 
-    int size(){ return size_ ;}
+    int size() const{ return size_ ;}
 
-    int capacity(){return capacity_ ; }
+    int capacity() const{return capacity_ ; }
 
-    bool empty(){return size_ != 0 ;}
+    bool empty() const{return size_ != 0 ;}
 
-    bool contains_key(KeyT &key_to_check) {
+    bool contains_key (KeyT &key_to_check){
         int indx = hush_func(key_to_check) ;
-        for (int i = 0; i < main_array_p_[indx]->size(); ++i) {
+        for (int i = 0; i < main_array_p_[indx].size(); ++i) {
             if (main_array_p_[indx][i].first == key_to_check)
             {
                 return true ;
@@ -143,7 +139,7 @@ public:
     }
     bool contains_key(const KeyT key_to_check) const {
         int indx = hush_func(key_to_check) ;
-        for (int i = 0; i < main_array_p_[indx]->size(); ++i) {
+        for (int i = 0; i < main_array_p_[indx].size(); ++i) {
             if (main_array_p_[indx][i].first == key_to_check)
             {
                 return true ;
@@ -152,7 +148,7 @@ public:
         return false ;
     }
 
-    double get_load_factor(){
+    double get_load_factor() const{
         double load_factor = (((double)size_)/capacity_) ;
         return load_factor ;
     }
@@ -178,10 +174,7 @@ public:
             return false;
         }
         int indx = hush_func(key) ;
-        int i = 0 ;
-        while(main_array_p_[indx][i]){
-            i++ ;
-        }
+        size_t i = main_array_p_[indx].size() ;
         main_array_p_[indx].emplace_back(pair_vec()) ;
         main_array_p_[indx][i].first = key ;
         main_array_p_[indx][i].second = value ;
@@ -194,32 +187,31 @@ public:
         return true ;
     }
 
-    virtual bool erase (const KeyT &key){
-        if(!contains_key(key)){
-            return false;
+    virtual bool erase(const KeyT &key) {
+        int indx = hush_func(key);
+        int i = 0;
+        for (auto &pair : main_array_p_[indx]) {
+            if (pair.first == key) {
+                main_array_p_[indx].erase(main_array_p_[indx].begin() + i);
+                size_--;
+                if (get_load_factor() < LOWLIM) {
+                    rehash();
+                }
+                return true;
+            }
+            i++;
         }
-        int indx = hush_func(key) ;
-        int i = 0 ;
-        while(main_array_p_[indx][i].first != key ){
-            i++ ;
-        }
-        main_array_p_[indx].erase(i) ;
-        size_-- ;
-        if (get_load_factor() < LOWLIM) {
-            rehash() ;
-        }
-        return true ;
+        return false;
     }
 
     ValueT& at (const KeyT key) const{
-        ValueT val = operator[](key) ;
-        if ( val == NULL){
-            throw std::runtime_error(KEY_PROB);
+        if(this->operator[](key) == NULL){
+            throw std::out_of_range(KEY_PROB) ;
         }
-        return val ;
+        return this->operator[](key) ;
     }
 
-    int bucket_index(KeyT key){
+    int bucket_index(KeyT key) const{
         if (contains_key(key)){
             return hush_func(key);
         }
@@ -231,7 +223,7 @@ public:
         for (int i = 0; i < capacity_; ++i) {
             j = 0 ;
             while (main_array_p_[i][j]){
-                main_array_p_[i].erase(j) ;
+                main_array_p_[i]->erase(j);
                 j++ ;
             }
         }
@@ -262,8 +254,8 @@ public:
             return *this ;
         }
 
-        ConstIterator operator++ (int){
-            ConstIterator copy(*this) ;
+        ConstIterator operator++ (int) {
+            ConstIterator &copy(*this) ;
             this->operator++() ;
             return *this ;
         }
@@ -289,7 +281,7 @@ public:
     using const_iterator = ConstIterator;
 
 
-    ConstIterator cbegin() const{
+    ConstIterator cbegin() const {
         int i = 0 ;
         while (!main_array_p_[i][0]){i++ ;}
         return main_array_p_[i][0] ;
@@ -304,7 +296,7 @@ public:
         return main_array_p_[indx][i] ;
     }
 
-    ConstIterator begin() const { return cbegin();};
+    ConstIterator begin() const{ return cbegin();};
 
     ConstIterator end() const { return cend();};
 

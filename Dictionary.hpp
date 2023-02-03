@@ -5,7 +5,7 @@
 using std::string;
 using std::pair;
 using std::vector ;
-using iterator = std::vector<pair<string,string>>::const_iterator;
+using iterator = vector<pair<string,string>>::const_iterator;
 class InvalidKey: public std::invalid_argument {
 public:
     using std::invalid_argument::invalid_argument;
@@ -19,7 +19,7 @@ public:
     using HashMap<std::basic_string<char>,std::basic_string<char>>::HashMap ;
 
 
-    bool erase(const string &key) final {
+    bool erase(const string &key) override {
         if(contains_key(key)){
             return HashMap<std::basic_string<char>,std::basic_string<char>>::erase(key) ;
         }
