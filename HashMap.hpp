@@ -66,7 +66,9 @@ template<typename KeyT, typename ValueT> class HashMap{
             if (this == &data){
                 return *this ;
             }
-            main_array_p_ = data.main_array_p_;
+            for (int i = 0; i < capacity(); ++i) {
+                main_array_p_[i] = data.main_array_p_[i];
+            }
             capacity_ = data.capacity() ;
             size_ = data.size() ;
             return (*this) ;
