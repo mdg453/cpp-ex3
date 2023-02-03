@@ -13,8 +13,8 @@ public:
     explicit InvalidKey (const string &err_mssg) : std::invalid_argument(err_mssg){};
 };
 
-template<typename KeyT, typename ValueT> class Dictionary :
-                        public HashMap<string , string> {
+//template<typename KeyT, typename ValueT>
+class Dictionary :public HashMap<string , string> {
 public:
     using HashMap<std::basic_string<char>,std::basic_string<char>>::HashMap ;
 
