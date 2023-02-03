@@ -10,7 +10,8 @@ class InvalidKey: public std::invalid_argument {
 public:
     using std::invalid_argument::invalid_argument;
     InvalidKey() : std::invalid_argument(KEY_ERR) {};
-    explicit InvalidKey (const string &err_mssg) : std::invalid_argument(err_mssg){};
+    explicit InvalidKey (const string &err_mssg) :
+                                        std::invalid_argument(err_mssg){};
 };
 class Dictionary :
                         public HashMap<string , string> {
@@ -20,7 +21,8 @@ public:
 
     bool erase(const string &key) override {
         if(contains_key(key)){
-            return HashMap<std::basic_string<char>,std::basic_string<char>>::erase(key) ;
+            return HashMap<std::basic_string<char>,
+                                        std::basic_string<char>>::erase(key) ;
         }
         throw InvalidKey() ;
     }

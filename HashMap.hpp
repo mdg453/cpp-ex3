@@ -242,7 +242,8 @@ template<typename KeyT, typename ValueT> class HashMap{
             const HashMap<KeyT,ValueT>& map_;
             int current_bucket_;
             int current_pos_;
-            explicit ConstIterator(const HashMap<KeyT,ValueT> &data) : map_(data), current_bucket_(0), current_pos_(0) {}
+            explicit ConstIterator(const HashMap<KeyT,ValueT> &data) :
+                                    map_(data), current_bucket_(0), current_pos_(0) {}
         public:
             typedef std::pair<KeyT, ValueT> value_type;
             typedef const value_type &reference;
