@@ -88,6 +88,10 @@ template<typename KeyT, typename ValueT> class HashMap{
         }
 
         int bucket_size(KeyT key) const{
+            int h_f = hush_func(key) ;
+            if (h_f >= capacity() ||h_f < 0 ){
+                throw std::out_of_range(KEY_PROB);
+            }
             return main_array_p_[hush_func(key)].size() ;
         }
 
@@ -177,7 +181,7 @@ template<typename KeyT, typename ValueT> class HashMap{
             }
             int indx = hush_func(key) ;
             main_array_p_[indx].emplace_back(single_pair(key,value)) ;
-            size_++ ;
+            size_ += 1 ;
             if (get_load_factor() > HIGHLIM) {
                 rehash() ;
             }
@@ -227,7 +231,7 @@ template<typename KeyT, typename ValueT> class HashMap{
             for (int i = 0; i < capacity_; ++i) {
                  main_array_p_[i].clear() ;
             }
-
+            size_ = 0 ;
         }
 
 
