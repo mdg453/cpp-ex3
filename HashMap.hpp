@@ -29,15 +29,13 @@ template<typename KeyT, typename ValueT> class HashMap{
 
     public:
 
-        HashMap(): size_(0), capacity_(BASE_CAP), main_array_p_(new pair_vec_array[16]) {}
+        HashMap(): size_(0), capacity_(BASE_CAP), main_array_p_(new pair_vec_array[BASE_CAP]) {}
 
         HashMap (const vector<KeyT> &keys, const vector<ValueT> &values) : HashMap(){
             if (keys.size () != values.size ())
             {
                 throw (std::domain_error{"vectors length not equal"});
             }
-            size_ = 0 ;
-            capacity_ = BASE_CAP ;
             for (size_t i = 0; i < keys.size (); i++) {
                 if (contains_key(keys[i])) {
                     at(keys[i]) = values[i];
@@ -49,21 +47,24 @@ template<typename KeyT, typename ValueT> class HashMap{
         }
 
 
-
-
-        HashMap (const HashMap *map_to_copy) {
-            capacity_ = map_to_copy->capacity_;
-            size_ = map_to_copy->size_;
-            main_array_p_ = new vector<pair<KeyT, ValueT>>[capacity_];
-            for (int i = 0; i < capacity_; i++)
-            {
-                main_array_p_[i] = map_to_copy->main_array_p_[i];
+        HashMap (const HashMap *map_to_copy){
+            vector<KeyT> new_vec_keys = {} ;
+            vector<ValueT> new_vec_val= {} ;
+            for (int i = 0; i < capacity_; ++i) {
+                for(int j = 0 ; j < main_array_p_[i].size(); ++j ) {
+                    new_vec_keys.emplace_back(map_to_copy->main_array_p_[i][j].first) ;
+                    new_vec_val.emplace_back(map_to_copy->main_array_p_[i][j].second) ;
+                }
             }
+            HashMap new_hash = new HashMap(new_vec_keys,new_vec_val) ;
+            main_array_p_ = new_hash.main_array_p_ ;
+            capacity_ = new_hash.capacity() ;
+            size_ = new_hash.size() ;
         }
 
-        virtual ~HashMap() {
-            delete[] main_array_p_ ;
-        }
+        virtual ~HashMap() = default ;
+//            delete[] main_array_p_ ;
+//        }
 
         HashMap& operator= (const HashMap& data) {
             if (this == &data){
@@ -72,7 +73,6 @@ template<typename KeyT, typename ValueT> class HashMap{
             main_array_p_ = data.main_array_p_;
             capacity_ = data.capacity() ;
             size_ = data.size() ;
-//            std::swap(&main_array_p_, data.main_array_p_) ;
             return (*this) ;
         }
 
@@ -130,7 +130,7 @@ template<typename KeyT, typename ValueT> class HashMap{
 
         int capacity() const{return capacity_ ; }
 
-        bool empty() const{return size_ != 0 ;}
+        bool empty() const{return size_ == 0 ;}
 
         bool contains_key (KeyT &key_to_check){
             int indx = hush_func(key_to_check) ;
