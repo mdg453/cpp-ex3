@@ -161,7 +161,7 @@ template<typename KeyT, typename ValueT> class HashMap{
             if(new_vec_keys.size() > HIGHLIM*capacity_){
                 capacity_ *= 2 ;
             }
-            if(new_vec_keys.size() > HIGHLIM*capacity_){
+            if(new_vec_keys.size() < LOWLIM*capacity_){
                 capacity_ /= 2 ;
             }
             main_array_p_ = new pair_vec_array [capacity_] ;
@@ -189,8 +189,8 @@ template<typename KeyT, typename ValueT> class HashMap{
             int i = 0;
             for (auto &pair : main_array_p_[indx]) {
                 if (pair.first == key) {
-                    main_array_p_[indx].erase(main_array_p_[indx].begin() + i);
-                    size_--;
+                    main_array_p_[indx].erase(main_array_p_[indx].begin());
+                    size_ -= 1;
                     if (get_load_factor() < LOWLIM) {
                         rehash();
                     }
