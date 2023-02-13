@@ -51,11 +51,19 @@ public:
 
 
     HashMap(const HashMap *map_to_copy) : HashMap() {
-        for (int i = 0; i < map_to_copy->capacity(); ++i) {
-            for (int j = 0; j < map_to_copy->main_array_p_[i].size(); ++j) {
-                insert(map_to_copy->main_array_p_[i][j].first,
-                       map_to_copy->main_array_p_[i][j].second);
+        vector<KeyT> new_vec_keys = {};
+        vector<ValueT> new_vec_val = {};
+        for (size_t i = 0; i < capacity_; ++i) {
+            for (size_t j = 0; j < main_array_p_[i].size(); ++j) {
+                new_vec_keys.emplace_back(main_array_p_[i][j].first);
+                new_vec_val.emplace_back(main_array_p_[i][j].second);
             }
+        }
+        capacity_ = map_to_copy->capacity_ ;
+        size_ = 0;
+        main_array_p_ = new pair_vec_array[capacity_];
+        for (size_t i = 0; i < new_vec_keys.size(); ++i) {
+            insert(new_vec_keys[i], new_vec_val[i]);
         }
     }
 
@@ -258,8 +266,6 @@ public:
             }
         }
 
-//        explicit ConstIterator(const HashMap<KeyT, ValueT> &data) :
-//                map_(data), current_bucket_(0), current_pos_(0) {}
 
     public:
         typedef std::pair<KeyT, ValueT> value_type;
