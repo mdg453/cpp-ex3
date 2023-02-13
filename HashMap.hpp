@@ -135,7 +135,7 @@ public:
 
     bool contains_key(KeyT &key_to_check) {
         int indx = hush_func(key_to_check);
-        for (int i = 0; i < main_array_p_[indx].size(); ++i) {
+        for (size_t i = 0; i < main_array_p_[indx].size(); ++i) {
             if (main_array_p_[indx][i].first == key_to_check) {
                 return true;
             }
@@ -161,8 +161,8 @@ public:
     void rehash() {
         vector<KeyT> new_vec_keys = {};
         vector<ValueT> new_vec_val = {};
-        for (int i = 0; i < capacity_; ++i) {
-            for (int j = 0; j < main_array_p_[i].size(); ++j) {
+        for (size_t i = 0; i < capacity_; ++i) {
+            for (size_t j = 0; j < main_array_p_[i].size(); ++j) {
                 new_vec_keys.emplace_back(main_array_p_[i][j].first);
                 new_vec_val.emplace_back(main_array_p_[i][j].second);
             }
@@ -215,8 +215,8 @@ public:
     }
 
     ValueT &at(const KeyT key) const {
-        int indx = hush_func(key);
-        for (int j = 0; j < main_array_p_[indx].size(); ++j) {
+        size_t indx = hush_func(key);
+        for (size_t j = 0; j < main_array_p_[indx].size(); ++j) {
             if (main_array_p_[indx].size() > 0) {
                 if (main_array_p_[indx][j].first == key) {
                     return main_array_p_[indx][j].second;
