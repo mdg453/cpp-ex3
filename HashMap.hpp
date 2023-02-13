@@ -28,8 +28,8 @@ class HashMap {
 
 protected:
     pair_vec_array *main_array_p_{};
-    int size_;
-    int capacity_;
+    size_t size_;
+    size_t capacity_;
 
 public:
 
@@ -109,13 +109,12 @@ public:
         // hash func -> v mod size = v & (size − 1)
 
         int indx = hush_func(key);
-        for (int j = 0; j < main_array_p_[indx].size(); ++j) {
+        for (size_t j = 0; j < main_array_p_[indx].size(); ++j) {
             if (main_array_p_[indx][j].first == key) {
                 return main_array_p_[indx][j].second;
             }
         }
         this->insert(key, ValueT());
-        int vec_size = main_array_p_[indx].size();
         return this->at(key);
     }
 
@@ -145,7 +144,7 @@ public:
 
     bool contains_key(const KeyT key_to_check) const {
         int indx = hush_func(key_to_check);
-        for (int i = 0; i < main_array_p_[indx].size(); ++i) {
+        for (size_t i = 0; i < main_array_p_[indx].size(); ++i) {
             if (main_array_p_[indx][i].first == key_to_check) {
                 return true;
             }
@@ -246,8 +245,8 @@ public:
 
     private:
         const HashMap<KeyT, ValueT> &map_;
-        int current_bucket_;
-        int current_pos_;
+        size_t current_bucket_;
+        size_t current_pos_;
 
         explicit ConstIterator(const HashMap<KeyT, ValueT> &data, int current_bucket,
                                                                         int current_pos) :
