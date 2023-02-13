@@ -28,15 +28,13 @@ public:
     }
 
     void update(const iterator & it_begin, const iterator & it_end) {
-        while (it_begin!=it_end)
-        {
-            if(contains_key((it_begin->first)))
-            {
-                at(it_begin->first) =  (*it_begin).second;
+
+        for (auto run = it_begin ; run != it_end ; run++){
+            if(this->contains_key((run->first))){
+                this->at(run->first) =  (*run).second;
                 return;
             }
-            insert(it_begin->first, it_begin->second);
-            it_begin.operator+(1);
+            insert(run->first, run->second);
         }
     }
 
