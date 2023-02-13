@@ -28,13 +28,18 @@ public:
     }
 
     void update(const iterator & it_begin, const iterator & it_end) {
-
         for (auto run = it_begin ; run != it_end ; run++){
             if(this->contains_key((run->first))){
-                this->at(run->first) =  (*run).second;
-                return;
+                auto *vec = &this->main_array_p_[hush_func(run->first)] ;
+                for(int i = 0 ; i < vec->size() ; i++){
+                    if (vec[0][i].first == run->first){
+                        vec[0][i].second = run->second ;
+                    }
+                }
             }
-            insert(run->first, run->second);
+            else {
+                this->insert(run->first, run->second);
+            }
         }
     }
 

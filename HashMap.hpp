@@ -27,7 +27,7 @@ class HashMap {
     typedef vector<single_pair> pair_vec_array;
 
 protected:
-    pair_vec_array *main_array_p_{};
+    pair_vec_array *main_array_p_;
     size_t size_;
     size_t capacity_;
 
@@ -115,7 +115,6 @@ public:
 
     ValueT &operator[](const KeyT &key) {
         // hash func -> v mod size = v & (size − 1)
-
         int indx = hush_func(key);
         for (size_t j = 0; j < main_array_p_[indx].size(); ++j) {
             if (main_array_p_[indx][j].first == key) {
